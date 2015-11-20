@@ -30,7 +30,7 @@ type alias Book =
   , title : String
   , genre : String
   , author : String
-  , word_count : Int
+  , wordCount : Int
   , pages : Int
   , status : String
   }

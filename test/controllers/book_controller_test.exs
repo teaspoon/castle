@@ -23,7 +23,7 @@ defmodule Castle.BookControllerTest do
       "title" => book.title,
       "genre" => book.genre,
       "author" => book.author,
-      "word_count" => book.word_count,
+      "wordCount" => book.word_count,
       "pages" => book.pages,
       "status" => book.status}
   end
