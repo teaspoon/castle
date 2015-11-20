@@ -6,6 +6,7 @@ import Html.Events exposing (onClick)
 import StartApp
 import Effects exposing (Effects, Never)
 import Task exposing (Task)
+import Json.Decode as Json exposing((:=))
 
 app =
   StartApp.start
@@ -40,15 +41,7 @@ type alias Model =
 
 init : (Model, Effects Action)
 init =
-  let
-    books =
-      [ {isbn = "978-0575097360", title = "The Way of Kings Part One", genre = "Fantasy", author = "Brandon Sanderson", word_count = 200000, pages = 608, status = "Currently Reading"}
-      , {isbn = "978-0575102484", title = "The Way of Kings Part Two", genre = "Fantasy", author = "Brandon Sanderson", word_count = 187000, pages = 585, status = "Up Next"}
-      , {isbn = "978-0575081406", title = "The Name of the Wind (The Kingkiller Chronicle)", genre = "Fantasy", author = "Patrick Rothfuss", word_count = 259000, pages = 672, status = "Completed"}
-      ]
-  in
-    (books, Effects.none)
-
+  ([], fetchBooks)
 
 -- UPDATE
 
@@ -68,6 +61,11 @@ update action model =
           else bookFromModel
       in
         (List.map updateBook model, Effects.none)
+    SetBooks books ->
+      let
+        newModel = Maybe.withDefault model, books
+      in
+        (newModel, Effects.none)
 
 
 -- VIEW
@@ -82,3 +80,26 @@ bookItem address book =
     [ class "book"
     , onClick address (Toggle book)]
     [ text book.title, text " ", text book.status ]
+
+-- EFFECTS
+
+fetchBooks : Effects Action
+fetchBooks =
+  Http.get decodeBooks "http://localhost:4000/api/books"
+    |> Task.toMaybe
+    |> Task.map SetBooks
+    |> Effects.task
+
+decodeBooks : Json.Decoder Model
+decodeBooks =
+  let
+    book =
+      Json.object2 ("isbn" := Json.string)
+      Json.object2 ("title" := Json.string)
+      Json.object2 ("genre" := Json.string)
+      Json.object2 ("author" := Json.string)
+      Json.object2 ("status" := Json.string)
+      Json.object2 ("wordCount" := Json.string)
+      Json.object2 ("pages" := Json.string)
+  in
+    Json.at ["data"] (Json.list book)
