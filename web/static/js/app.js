@@ -13,6 +13,9 @@
 // to also remove its path from "config.paths.watched".
 import "deps/phoenix_html/web/static/js/phoenix_html"
 
+var elmDiv = document.getElementById('main')
+  , elmApp = Elm.embed(Elm.Castle, elmDiv);
+
 // Import local files
 //
 // Local files can be imported directly using relative
