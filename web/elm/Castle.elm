@@ -3,4 +3,9 @@ module Castle where
 import Html
 
 main =
-  Html.text "Hello from Elm"
+  view
+
+-- VIEW
+
+view =
+  Html.text "Hello from elm"
