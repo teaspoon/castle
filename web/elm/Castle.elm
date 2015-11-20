@@ -2,10 +2,16 @@ module Castle where
 
 import Html exposing (..)
 import Html.Attributes exposing (class)
+import Html.Events exposing (onClick)
+import StartApp.Simple
 
-main : Html
+main : Signal Html
 main =
-  view init
+  StartApp.Simple.start
+    { model = init
+    , update = update
+    , view = view
+    }
 
 -- MODEL
 
@@ -29,12 +35,36 @@ init =
   , {isbn = "978-0575081406", title = "The Name of the Wind (The Kingkiller Chronicle)", genre = "Fantasy", author = "Patrick Rothfuss", word_count = 259000, pages = 672, status = "Completed"}
   ]
 
+
+-- UPDATE
+
+type Action = Toggle Book
+
+update : Action -> Model -> Model
+update action model =
+  case action of
+    Toggle bookToToggle ->
+      let
+        updateBook bookFromModel =
+          if bookFromModel.isbn == bookToToggle.isbn then
+            if bookToToggle.status == "Up Next" then
+              { bookFromModel | status = "Currently Reading" }
+            else
+              { bookFromModel | status = "Completed" }
+          else bookFromModel
+      in
+        List.map updateBook model
+
+
 -- VIEW
 
-view : Model -> Html
-view model =
-  ul [ class "books" ] (List.map bookItem model)
+view : Signal.Address Action -> Model -> Html
+view address model =
+  ul [ class "books" ] (List.map (bookItem address) model)
 
-bookItem : Book -> Html
-bookItem book =
-  li [ class "book" ] [ text book.title ]
+bookItem : Signal.Address Action -> Book -> Html
+bookItem address book =
+  li
+    [ class "book"
+    , onClick address (Toggle book)]
+    [ text book.title, text " ", text book.status ]
